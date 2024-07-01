@@ -1,4 +1,5 @@
 mod send_ollama_request;
+mod handle_operations;
 
 use colored::*;
 use std::{
@@ -6,13 +7,17 @@ use std::{
     io::{self, Write},
 };
 
+
+
 #[tokio::main]
-async fn main() -> Result<(), reqwest::Error> {
+async fn main() -> anyhow::Result<(), reqwest::Error> {
     let args: Vec<String> = env::args().collect();
     if args.len() > 1 {
-        let model = args.get(1).unwrap_or_else(|| {
+        let unprocced_model = args.get(1).unwrap_or_else(|| {
             std::process::exit(1);
         });
+
+        let mut model: String = unprocced_model.to_string();
 
         loop {
             print!("> ");
@@ -25,10 +30,11 @@ async fn main() -> Result<(), reqwest::Error> {
 
             let input = input.trim();
 
-            if input == "!exit" {
-                break;
+            if input.starts_with("!") {
+                model = handle_operations::handle_telosom_operations(input).await.expect("Failed to proccess");
+            } else {
+                let _ = send_ollama_request::send_request(input, model.clone()).await?;
             }
-            let _ = send_ollama_request::send_request(input, model).await?;
         }
     } else {
         eprintln!("{}: No model has been provided", "Error".red());

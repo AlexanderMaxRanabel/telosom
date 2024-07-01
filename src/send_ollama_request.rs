@@ -1,14 +1,6 @@
 use reqwest::{Client};
 use serde::{Serialize};
 
-/*#[derive(Deserialize)]
-struct OllamaResponse {
-    model: String,
-    created_at: String,
-    response: String,
-    done: bool,
-}*/
-
 #[derive(Serialize)]
 struct TelosomRequest {
     model: String,
@@ -16,9 +8,9 @@ struct TelosomRequest {
     stream: bool,
 }
 
-pub async fn send_request(input: &str, model: &str) -> Result<(), reqwest::Error> {
+pub async fn send_request(input: &str, model: String) -> Result<(), reqwest::Error> {
     let string_input: String = input.to_string();
-    let string_model: String = model.to_string();
+    let string_model: String = model;
     let req_json = TelosomRequest {
         model: string_model,
         prompt: string_input,
